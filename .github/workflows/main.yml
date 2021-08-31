@@ -1,0 +1,41 @@
+# This workflow will build a Java project with Maven
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: Office E5
+
+on:
+  schedule:
+    - cron: '30 */6 * * *'
+  release:
+    types: [published]
+  watch:
+    types: [started]
+
+jobs: 
+  Update-Log:
+    runs-on: ubuntu-latest
+    if: github.event.repository.owner.id == github.event.sender.id # 自己star启动
+    steps:
+    - name: Setup timezone
+      uses: zcong1993/setup-timezone@v1.1.1
+      with:
+        timezone: Asia/Shanghai
+    - uses: actions/checkout@v2
+    - name: Run 
+      run: |
+        date > ./run.log
+        tail run.log
+    - name: Commit log
+      env:
+        NAME: Shadow-sword
+        EMAIL: ShadowSwords2019@outlook.com
+      run: |
+        git config --global user.name "$NAME"
+        git config --global user.email "$EMAIL"
+        git add .
+        git commit -m "update log on $(date)" -a
+    - name: Push log
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.TOKEN }}
+        branch: master
